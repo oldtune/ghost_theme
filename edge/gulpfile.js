@@ -1,4 +1,4 @@
-const {series, parallel, watch, src, dest} = require('gulp');
+const { series, parallel, watch, src, dest } = require('gulp');
 const pump = require('pump');
 const fs = require('fs');
 const order = require('ordered-read-streams');
@@ -15,6 +15,7 @@ const zip = require('gulp-zip');
 const easyimport = require('postcss-easy-import');
 const autoprefixer = require('autoprefixer');
 const cssnano = require('cssnano');
+const tailwindcss = require('@tailwindcss/postcss');
 
 function serve(done) {
     livereload.listen();
@@ -22,7 +23,7 @@ function serve(done) {
 }
 
 function handleError(done) {
-    return function (err) {
+    return function(err) {
         if (err) {
             beeper();
         }
@@ -39,13 +40,14 @@ function hbs(done) {
 
 function css(done) {
     pump([
-        src('assets/css/screen.css', {sourcemaps: true}),
+        src('assets/css/screen.css', { sourcemaps: true }),
         postcss([
             easyimport,
             autoprefixer(),
+            tailwindcss(),
             cssnano()
         ]),
-        dest('assets/built/', {sourcemaps: '.'}),
+        dest('assets/built/', { sourcemaps: '.' }),
         livereload()
     ], handleError(done));
 }
@@ -67,10 +69,10 @@ function getJsFiles(version) {
 
 function js(done) {
     pump([
-        order(getJsFiles('v1'), {sourcemaps: true}),
+        order(getJsFiles('v1'), { sourcemaps: true }),
         concat('main.min.js'),
         uglify(),
-        dest('assets/built/', {sourcemaps: '.'}),
+        dest('assets/built/', { sourcemaps: '.' }),
         livereload()
     ], handleError(done));
 }
