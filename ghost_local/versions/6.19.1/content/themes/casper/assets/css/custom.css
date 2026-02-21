@@ -17,6 +17,8 @@
 .post-card-title,
 .byline-meta-content,
 .byline-meta-content *,
+.article-tag,
+.article-tag *,
 .site-footer,
 .site-footer a,
 .copyright,
@@ -518,6 +520,8 @@ body.home-template #site-main {
     body.post-template .author-name a,
     body.post-template .byline-meta-content,
     body.post-template .byline-meta-content *,
+    body.post-template .article-tag,
+    body.post-template .article-tag *,
     body.post-template .post-card-primary-tag,
     body.post-template .post-card-title {
         color: #bb7888 !important;
