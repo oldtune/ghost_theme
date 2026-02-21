@@ -1,0 +1,657 @@
+/* ================================================================
+   Custom Theme — Autumn Orange Landing Page
+   Theme color #141c26 · Hero orange #F5A623 · Background #FEF3E2
+   ================================================================ */
+
+/* ================================================================
+   PIXEL FONT — Press Start 2P
+   Applied to: navbar, hero card, post title (NOT post content)
+   ================================================================ */
+.gh-head-logo,
+.gh-head-menu a,
+.gh-head-link,
+.hero-title,
+.hero-description,
+.hero-cta-btn,
+.article-title,
+.post-card-title,
+.byline-meta-content,
+.byline-meta-content *,
+.site-footer,
+.site-footer a,
+.copyright,
+.site-footer-nav a,
+.gh-powered-by,
+.gh-powered-by a,
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Press Start 2P', monospace !important;
+}
+
+/* ================================================================
+   ALL IMAGES — pixelated rendering
+   ================================================================ */
+img {
+    image-rendering: pixelated;
+}
+
+/* ================================================================
+   RETRO SCROLLBAR — thick, rough-edged pixel style
+   ================================================================ */
+::-webkit-scrollbar {
+    width:  40px;
+    height: 20px;
+}
+
+::-webkit-scrollbar-track {
+    background: #676a6f;
+    /* rough pixel frame: hard dark outline + inner recess shadow */
+    box-shadow:
+        inset  2px  2px 0 #000,
+        inset -2px -2px 0 #000,
+        inset  4px  4px 0 #3e4145;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #e3dea8;
+    /* Win95-style raised 3D pixel effect */
+    box-shadow:
+        inset  2px  2px 0 #f5f0c8,   /* light highlight — top & left */
+        inset -2px -2px 0 #a8a370,   /* dark shadow   — bottom & right */
+        inset  4px  4px 0 #ece7b0,   /* mid highlight step */
+        inset -4px -4px 0 #b8b380;   /* mid shadow step */
+}
+
+/* Firefox */
+html {
+    scrollbar-width: auto;
+    scrollbar-color: #e3dea8 #676a6f;
+}
+
+::selection {
+    background: #e3dea8;
+    color: var(--theme);
+}
+
+:root {
+    /* --theme, --theme-lt, --text, --hero-bg are injected by default.hbs
+       from Ghost Admin > Design > Custom settings.
+       Fallbacks here keep things working if the style tag is somehow absent. */
+    --theme:     #141c26;
+    --theme-lt:  #141c26;
+    --text:      #dfdaf0;
+    --text-rgb:  223, 218, 240;  /* RGB channels of --text for rgba() usage */
+    --hero-bg:   #FEF3E2;
+
+    /* Accent color driven by Ghost Admin > Brand > Accent color */
+    --orange:    var(--ghost-accent-color, #F5A623);
+    --orange-dk: var(--ghost-accent-color, #E8950F);
+}
+
+/* ================================================================
+   POST PAGE BACKGROUND VIDEO — hidden everywhere by default,
+   activated only on post pages in portrait orientation via media query
+   ================================================================ */
+.post-bg-video,
+.post-bg-overlay {
+    display: none;
+}
+
+/* ================================================================
+   GLOBAL — entire page uses the dark theme colour with white text
+   ================================================================ */
+body,
+.viewport,
+.site-content,
+.site-main {
+    background-color: var(--theme);
+    color: var(--text);
+}
+
+/* ================================================================
+   NAVIGATION
+   ================================================================ */
+
+/* Replace CSS burger lines with SVG icon */
+.gh-burger::before,
+.gh-burger::after {
+    display: none;
+}
+
+.gh-burger svg {
+    display: block;
+    pointer-events: none;
+}
+.gh-head {
+    background-color: var(--theme) !important;
+}
+
+body.home-template .gh-head {
+    position: relative !important;
+    top:   auto !important;
+    left:  auto !important;
+    right: auto !important;
+    z-index: 150 !important;
+}
+
+.gh-head-actions,
+.gh-head-members,
+.gh-head-button,
+.gh-head-link,
+[data-portal="signup"],
+[data-portal="signin"],
+[data-portal="account"] {
+    display: none !important;
+}
+
+/* Text on the dark nav */
+.gh-head,
+.gh-head *:not(.gh-head-button):not(.gh-head-button *) {
+    color: var(--text) !important;
+}
+
+/* Orange pill button (Subscribe / Sign in / Account) */
+.gh-head-button,
+a.gh-head-button {
+    background:    var(--orange);
+    border:        2px solid var(--orange);
+    border-radius: 50px;
+    padding:       8px 22px;
+    color:         #fff;
+    font-weight:   600;
+}
+
+.gh-head-button:hover,
+a.gh-head-button:hover {
+    background:   var(--orange-dk);
+    border-color: var(--orange-dk);
+    color:        #fff;
+}
+
+/* ================================================================
+   HERO SECTION — full viewport width and height
+   ================================================================ */
+.hero-section {
+    background-color: var(--theme); /* fallback when no cover image */
+    /* override .outer side padding so image goes true edge-to-edge */
+    padding-left:  0 !important;
+    padding-right: 0 !important;
+    padding-top:   0;
+    padding-bottom: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Background image fills the full section */
+.hero-bg-image {
+    position:        absolute;
+    inset:           0;
+    width:           100%;
+    height:          100%;
+    object-fit:      cover;
+    object-position: center;
+    z-index:         0;
+}
+
+/* Inner content sits above the background image */
+.hero-section .inner {
+    position:  relative;
+    z-index:   1;
+    flex:      1;
+    display:   flex;
+    flex-direction: column;
+    justify-content: center;
+    padding:   max(4vmin, 20px);
+}
+
+/* ================================================================
+   HERO CARD — transparent so background image shows through the right side
+   ================================================================ */
+.hero-card {
+    position: relative;
+    display:  flex;
+    align-items: stretch;
+    background:    transparent;
+    border-radius: 0;
+    overflow:      hidden;
+    min-height:    calc(100vh - 88px); /* full height minus nav bar */
+    box-shadow:    none;
+}
+
+/* ================================================================
+   HERO LEFT — text content
+   ================================================================ */
+.hero-text-area {
+    position: relative;
+    z-index: 3;
+    flex:      0 0 50%;
+    max-width:    50%;
+    display:        flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 56px 44px 56px 60px;
+}
+
+.hero-title {
+    font-size:      5.4rem;
+    font-weight:    800;
+    color:          var(--text);
+    line-height:    1.1;
+    margin:         0 0 20px;
+    letter-spacing: -0.025em;
+}
+
+.hero-description {
+    font-size:   1.45rem;
+    line-height: 1.75;
+    color:       rgba(var(--text-rgb), 0.88);
+    margin:      0 0 38px;
+    max-width:   280px;
+}
+
+.hero-description::after {
+    content:          '';
+    display:          inline-block;
+    width:            0.65em;
+    height:           1.1em;
+    background:       rgba(var(--text-rgb), 0.88);
+    margin-left:      0.2em;
+    vertical-align:   text-bottom;
+    animation:        cursor-blink 1s step-end infinite;
+}
+
+@keyframes cursor-blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+}
+
+.hero-cta-btn {
+    display:        inline-flex;
+    align-self:     flex-start;
+    align-items:    center;
+    padding:        10px 26px;
+    border:         2px solid rgba(var(--text-rgb), 0.7);
+    border-radius:  50px;
+    background:     transparent;
+    color:          var(--text);
+    font-size:      1.25rem;
+    font-weight:    600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.hero-cta-btn:hover {
+    background:   rgba(var(--text-rgb), 0.15);
+    border-color: var(--text);
+    color:        var(--text);
+    text-decoration: none;
+}
+
+/* ================================================================
+   HERO RIGHT — transparent spacer; section background shows through
+   ================================================================ */
+.hero-visual-area {
+    position: relative;
+    z-index:  2;
+    flex:     1;
+    /* no background, no image — section bg-image is visible here */
+}
+
+/* ================================================================
+   PAGINATION DOTS — below the hero card
+   ================================================================ */
+.hero-dots {
+    display: none;
+}
+
+.hero-dot {
+    display:       inline-block;
+    width:         10px;
+    height:        10px;
+    border-radius: 50%;
+    background:    var(--orange);
+    opacity:       0.28;
+}
+
+.hero-dot.is-active {
+    opacity: 1;
+}
+
+/* ================================================================
+   POST CARD IMAGE — grayscale + #2b3541 colour overlay
+   ================================================================ */
+.post-card-image-link {
+    background: rgb(43, 53, 65);
+}
+
+.post-card-image {
+    filter: grayscale(100%);
+    opacity: 0.55;
+}
+
+/* ================================================================
+   POST CARDS — white text
+   ================================================================ */
+.post-card-title,
+.post-card-excerpt,
+.post-card-meta,
+.post-card-meta-date,
+.post-card-meta-length,
+.post-card-tags,
+.post-card-primary-tag {
+    color: var(--text) !important;
+}
+
+.post-card-content-link,
+.post-card-content-link:hover {
+    color: var(--text) !important;
+}
+
+/* ================================================================
+   ARTICLE / SINGLE POST — white text
+   ================================================================ */
+.gh-content,
+.gh-content p,
+.gh-content h1,
+.gh-content h2,
+.gh-content h3,
+.gh-content h4,
+.gh-content h5,
+.gh-content h6,
+.gh-content li,
+.gh-content blockquote,
+.article-title,
+.article-excerpt,
+.post-full-title,
+.post-full-content {
+    color: var(--text) !important;
+}
+
+/* ================================================================
+   FOOTER
+   ================================================================ */
+.site-footer {
+    background-color: var(--theme) !important;
+    color: var(--text) !important;
+}
+
+.site-footer .inner,
+.site-footer a,
+.site-footer a:hover,
+.site-footer .copyright,
+.site-footer .copyright a,
+.site-footer-nav,
+.site-footer-nav a,
+.site-footer-nav a:hover {
+    color: var(--text) !important;
+}
+
+/* Hide any portal/signup links injected into the footer */
+.site-footer [data-portal],
+.site-footer a[href*="portal"],
+.site-footer a[href*="signup"],
+.site-footer a[href*="signin"],
+.site-footer .gh-subscribe,
+.site-footer .gh-subscribe-btn,
+.site-footer form[data-members-form],
+.site-footer .gh-head-members,
+.site-footer .gh-head-button,
+.site-footer .gh-head-link {
+    display: none !important;
+}
+
+/* Hide the post-page subscribe CTA that appears above the footer */
+.footer-cta {
+    display: none !important;
+}
+
+/* ================================================================
+   POST FEED — spacing below hero on home page
+   ================================================================ */
+body.home-template #site-main {
+    padding-top:    48px;
+    padding-bottom: 64px;
+}
+
+.post-card-primary-tag {
+    color: var(--theme) !important;
+}
+
+.post-card-featured {
+    color: var(--theme) !important;
+}
+
+/* ================================================================
+   HERO BACKGROUND VIDEO — orientation switching
+   ================================================================ */
+.hero-bg-portrait {
+    display: none;
+}
+
+@media (orientation: portrait) {
+    :root {
+        --theme:    #1b4065 !important;
+        --theme-lt: #1b4065 !important;
+        --text:     #000000 !important;
+        --text-rgb: 0, 0, 0 !important;
+    }
+
+    .gh-head {
+        background-color: #bb7888 !important;
+    }
+
+    /* Body, content headings, post cards, article, and footer text */
+    body,
+    .viewport,
+    .site-content,
+    .site-main,
+    .post-card-title,
+    .post-card-excerpt,
+    .post-card-meta,
+    .post-card-meta-date,
+    .post-card-meta-length,
+    .post-card-tags,
+    .post-card-primary-tag,
+    .post-card-featured,
+    .post-card-content-link,
+    .post-card-content-link:hover,
+    .gh-content,
+    .gh-content p,
+    .gh-content h1,
+    .gh-content h2,
+    .gh-content h3,
+    .gh-content h4,
+    .gh-content h5,
+    .gh-content h6,
+    .gh-content li,
+    .gh-content blockquote,
+    .article-title,
+    .article-excerpt,
+    .post-full-title,
+    .post-full-content,
+    .site-footer,
+    .site-footer .inner,
+    .site-footer a,
+    .site-footer a:hover,
+    .site-footer .copyright,
+    .site-footer .copyright a,
+    .site-footer-nav,
+    .site-footer-nav a,
+    .site-footer-nav a:hover {
+        color: #bb7888 !important;
+    }
+
+    /* Fixed video background on post pages */
+    body.post-template,
+    body.post-template .viewport,
+    body.post-template .site-content,
+    body.post-template .site-main {
+        background: transparent !important;
+    }
+
+    body.post-template .post-bg-video {
+        display: block;
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        z-index: -2;
+        filter: grayscale(100%);
+    }
+
+    body.post-template .post-bg-overlay {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(27, 64, 101, 0.3);
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    /* #bb7888 for nav logo, byline, and post card elements */
+    body.post-template .gh-head-logo.no-image,
+    body.post-template .author-name,
+    body.post-template .author-name a,
+    body.post-template .byline-meta-content,
+    body.post-template .byline-meta-content *,
+    body.post-template .post-card-primary-tag,
+    body.post-template .post-card-title {
+        color: #bb7888 !important;
+    }
+
+    /* White text for post content */
+    body.post-template .gh-content,
+    body.post-template .gh-content p,
+    body.post-template .gh-content h1,
+    body.post-template .gh-content h2,
+    body.post-template .gh-content h3,
+    body.post-template .gh-content h4,
+    body.post-template .gh-content h5,
+    body.post-template .gh-content h6,
+    body.post-template .gh-content li,
+    body.post-template .gh-content blockquote,
+    body.post-template .article-title,
+    body.post-template .article-excerpt {
+        color: #ffffff !important;
+    }
+
+    /* Transparent navbar and footer on post pages */
+    body.post-template .gh-head,
+    body.post-template .site-footer {
+        background-color: transparent !important;
+    }
+
+    /* Desaturate feature image + tinted overlay */
+    body.post-template .article-image-wrapper {
+        position: relative;
+        overflow: hidden;
+        filter: grayscale(100%);
+        background: rgba(26, 64, 101, 0.8);
+    }
+
+    body.post-template .article-image-wrapper img {
+        display: block;
+        width: 100%;
+        height: auto;
+        opacity: 0.3;
+    }
+
+
+    /* Scrollbar — track: navbar bg (#bb7888), thumb: footer bg (#1b4065) */
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #cd8d38;
+    }
+    html {
+        scrollbar-color: #cd8d38 transparent;
+    }
+
+    .hero-bg-landscape {
+        display: none;
+    }
+    .hero-bg-portrait {
+        display: block;
+    }
+}
+
+/* ================================================================
+   RESPONSIVE — tablet  ≤ 991px
+   ================================================================ */
+@media (max-width: 991px) {
+    .hero-card {
+        min-height: 56vh;
+    }
+
+    .hero-text-area {
+        flex:      0 0 55%;
+        max-width:    55%;
+        padding: 48px 36px 48px 48px;
+    }
+
+    .hero-title {
+        font-size: 4rem;
+    }
+
+    /* visual area is flex: 1 so it fills the remaining width automatically */
+}
+
+/* ================================================================
+   RESPONSIVE — mobile  ≤ 767px
+   ================================================================ */
+@media (max-width: 767px) {
+    .hero-dots {
+        display: none;
+    }
+
+    .hero-bg-image {
+        object-fit:      cover;
+        object-position: center center;
+        width:           100%;
+        height:          100%;
+    }
+
+    .hero-section {
+        padding-top: 24px;
+        min-height: 100vh;
+    }
+
+    .hero-card {
+        flex-direction: column;
+        border-radius:  20px;
+        min-height:     auto;
+    }
+
+    .hero-text-area {
+        background:    transparent;
+        flex:          none;
+        max-width:     100%;
+        width:         100%;
+        padding:       48px 32px 52px;
+        border-radius: 0;
+    }
+
+    /* On mobile the section bg-image is still visible above/below the stacked card */
+    .hero-visual-area {
+        display: none; /* hide the empty spacer in stacked mobile layout */
+    }
+
+    .hero-title {
+        font-size: 3.4rem;
+    }
+
+    .hero-description {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 2.8rem;
+    }
+}

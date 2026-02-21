@@ -1,0 +1,65 @@
+{{!< default}}
+{{!-- The tag above means: insert everything in this file
+into the {body} of the default.hbs template --}}
+
+{{!-- ============================================================
+     HERO — cover image fills the whole section as background;
+     the card floats on top with the orange blob on the left
+     and the background image visible through the right side.
+     ============================================================ --}}
+<section class="hero-section outer has-bg-image">
+    <video class="hero-bg-image hero-bg-landscape"
+           src="{{asset "images/wall.webm"}}"
+           autoplay loop muted playsinline
+           aria-hidden="true"
+    ></video>
+    <video class="hero-bg-image hero-bg-portrait"
+           src="{{asset "images/wall_vertical.webm"}}"
+           autoplay loop muted playsinline
+           aria-hidden="true"
+    ></video>
+
+    <div class="inner">
+        <div class="hero-card">
+
+{{!-- Left: text content on top of the orange blob --}}
+            <div class="hero-text-area">
+                <h1 class="hero-title">{{@site.title}}</h1>
+                {{#if @site.description}}
+                    <p class="hero-description">{{@site.description}}</p>
+                {{/if}}
+                <a class="hero-cta-btn" href="{{@site.url}}">More Info</a>
+            </div>
+
+            {{!-- Right: transparent — background image shows through --}}
+            <div class="hero-visual-area"></div>
+
+        </div>{{!-- /.hero-card --}}
+
+        {{!-- Decorative slide-indicator dots --}}
+        <div class="hero-dots" aria-hidden="true">
+            <span class="hero-dot is-active"></span>
+            <span class="hero-dot"></span>
+            <span class="hero-dot"></span>
+            <span class="hero-dot"></span>
+        </div>
+
+    </div>{{!-- /.inner --}}
+</section>
+
+{{!-- ============================================================
+     POST FEED
+     ============================================================ --}}
+<main id="site-main" class="site-main outer">
+<div class="inner posts">
+
+    <div class="post-feed">
+        {{#foreach posts}}
+            {{> "post-card"}}
+        {{/foreach}}
+    </div>
+
+    {{pagination}}
+
+</div>
+</main>
