@@ -123,7 +123,8 @@ body,
     display: block;
     pointer-events: none;
 }
-.gh-head {
+.gh-head,
+.gh-head-actions {
     background-color: var(--theme) !important;
 }
 
@@ -141,7 +142,8 @@ body.home-template .gh-head {
 .gh-head-link,
 [data-portal="signup"],
 [data-portal="signin"],
-[data-portal="account"] {
+[data-portal="account"],
+.is-header-hidden .gh-head-actions {
     display: none !important;
 }
 
@@ -440,7 +442,8 @@ body.home-template #site-main {
         --text-rgb: 0, 0, 0 !important;
     }
 
-    .gh-head {
+    .gh-head,
+    .gh-head-actions {
         background-color: #bb7888 !important;
     }
 
@@ -585,11 +588,15 @@ body.home-template #site-main {
 }
 
 /* ================================================================
-   LANDSCAPE — restore search button in navbar right corner
+   LANDSCAPE — restore search button and fix navbar padding
    ================================================================ */
 @media (orientation: landscape) {
     .gh-head-actions {
         display: flex !important;
+    }
+
+    .is-header-hidden .gh-head-actions {
+        display: none !important;
     }
 }
 
