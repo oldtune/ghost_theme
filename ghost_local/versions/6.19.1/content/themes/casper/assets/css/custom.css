@@ -188,9 +188,9 @@ a.gh-head-button:hover {
 .hero-bg-image {
     position:        absolute;
     inset:           0;
-    width:           100%;
-    height:          100%;
-    object-fit:      cover;
+    width:           100vw;
+    height:          100vh;
+    object-fit:      fill;
     object-position: center;
     z-index:         0;
 }
@@ -581,6 +581,56 @@ body.home-template #site-main {
     }
     .hero-bg-portrait {
         display: block;
+    }
+}
+
+/* ================================================================
+   LANDSCAPE — restore search button in navbar right corner
+   ================================================================ */
+@media (orientation: landscape) {
+    .gh-head-actions {
+        display: flex !important;
+    }
+}
+
+/* ================================================================
+   LANDSCAPE SMALL — cap post card image height at ≤ 991px wide
+   ================================================================ */
+@media (orientation: landscape) and (max-width: 991px) {
+    .post-card-image-link {
+        max-width: 70%;
+    }
+
+    .post-card-image-link::after {
+        padding-bottom: 0;
+    }
+
+    .post-card-image {
+        position: relative;
+        height: auto;
+        width: 100%;
+    }
+
+    .gh-canvas .article-image {
+        grid-column: main-start / main-end !important;
+        width: 60% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    .gh-canvas .article-image-wrapper {
+        position: relative;
+        overflow: hidden;
+        filter: grayscale(100%);
+        background: rgba(26, 64, 101, 0.8);
+    }
+
+    .gh-canvas .article-image img,
+    .gh-canvas .article-image-wrapper img {
+        display: block;
+        height: auto;
+        width: 100%;
+        opacity: 0.3;
     }
 }
 
