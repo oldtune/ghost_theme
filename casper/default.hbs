@@ -136,6 +136,34 @@ $(document).ready(function () {
     // FitVids - Makes video embeds responsive
     $(".gh-content").fitVids();
 });
+
+// Ensure background videos autoplay on mobile after reload or BFCache restore
+(function () {
+    function playAllVideos() {
+        document.querySelectorAll('video[autoplay]').forEach(function (v) {
+            if (v.paused) {
+                v.play().catch(function () {});
+            }
+        });
+    }
+
+    // BFCache restore (back/forward navigation or reload from cache)
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted) {
+            playAllVideos();
+        }
+    });
+
+    // Tab becomes visible again
+    document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) {
+            playAllVideos();
+        }
+    });
+
+    // Initial load fallback in case autoplay attribute alone wasn't enough
+    window.addEventListener('load', playAllVideos);
+}());
 </script>
 
 {{!-- Ghost outputs required functional scripts with this tag - it should always be the last thing before the closing body tag --}}
