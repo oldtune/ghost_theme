@@ -105,7 +105,7 @@ The theme has two distinct visual layouts switched entirely via CSS `@media (ori
 
 ### Hero Section (`index.hbs` + `custom.css`)
 The hero occupies 100vh and consists of:
-- **Background video**: a `<video>` tag absolutely positioned behind all content (`z-index: 0`), filling the viewport. Two videos are in the DOM; CSS hides/shows the correct one per orientation.
+- **Background video**: a `<video>` tag absolutely positioned behind all content (`z-index: 0`), filling the viewport. Two videos are in the DOM; CSS hides/shows the correct one per orientation, and only the matching one is ever fetched (see Loading Behavior below).
   - Landscape: `.hero-bg-landscape` — `wall.webm`, `object-fit: fill`
   - Portrait: `.hero-bg-portrait` — `wall_vertical.webm`, `object-fit: fill`
   - On mobile (`max-width: 767px`): `object-fit: cover` is applied to both.
@@ -114,8 +114,22 @@ The hero occupies 100vh and consists of:
   - Right `.hero-visual-area`: empty transparent spacer — the background video is visible through it.
 - **Decorative dots** (`.hero-dots`): hidden on mobile (`max-width: 767px`), currently hidden at all sizes (`display: none` in CSS — present in markup for potential future use).
 
+#### Loading behavior (orientation-aware lazy video loading + loaders)
+All three background videos (hero landscape, hero portrait, post-page portrait background) ship with `data-src` instead of `src` and `preload="none"`. An inline `<script>` in `default.hbs` (after the jQuery block) loads only the video the current orientation actually shows — `matchMedia('(orientation: portrait)')` decides which, once on page load and again on every orientation change — so a visitor never downloads both hero videos, or the post-page background video while in landscape.
+
+- **Home page full-page loader**: `#page-loader` (rendered only on the home template) covers the viewport until the active hero video fires `canplay`/`error`, or an 8s timeout elapses — whichever comes first, so a slow or broken connection never traps the visitor on the loader. Styled via `.page-loader` in `custom.css`.
+- **Post-card thumbnail loaders**: since thumbnails use native `loading="lazy"`, each `.post-card-image-link` gets an `is-loading` class (and a pixel "LOADING..." placeholder) until its image's `load`/`error` event fires; already-cached images (`img.complete`) skip this entirely.
+- Both loaders share one `@keyframes loader-dots` animation (cycles the `::before` `content` through `LOADING` → `LOADING...`), and both respect `prefers-reduced-motion` (static `LOADING...` text, no animation).
+
+#### Script loading order (jQuery, casper.js, inline script)
+jQuery and `casper.js` both load with `defer` (non-render-blocking). `casper.js` bundles the FitVids jQuery plugin, which needs `$`/`jQuery` to already exist when it runs — `defer` preserves relative document order between external scripts, so jQuery still finishes before `casper.js` even though both are delayed together.
+
+The inline `<script>` block right after them is **not** deferred (inline scripts without `src` ignore the `defer` attribute and always run immediately, in normal parse order) — so it runs *before* the deferred scripts finish, meaning `$` isn't defined yet at that point. Only the burger-menu/FitVids code actually needs jQuery, so just that part is wrapped in `document.addEventListener('DOMContentLoaded', ...)` (DOMContentLoaded only fires after all `defer` scripts have executed). The video lazy-loading and BFCache-autoplay-fix code is plain vanilla JS with no jQuery dependency, and deliberately stays outside that wrapper so it starts running as early as possible instead of waiting for DOMContentLoaded.
+
+If you add new inline script code here: if it touches `$`/jQuery, put it inside the `DOMContentLoaded` wrapper; if it's vanilla JS with no jQuery dependency, keep it outside for the earliest possible execution.
+
 #### Known issue: video autoplay on mobile reload (FIXED)
-On mobile browsers, the `autoplay` attribute is sometimes ignored after a page reload because the browser restores the page from **BFCache** (back/forward cache) with the video in a paused state. The fix lives in `default.hbs` as an inline `<script>` after the jQuery block. It explicitly calls `.play()` on all `video[autoplay]` elements on three events:
+On mobile browsers, the `autoplay` attribute is sometimes ignored after a page reload because the browser restores the page from **BFCache** (back/forward cache) with the video in a paused state. The fix lives in `default.hbs` as an inline `<script>` after the jQuery block. It explicitly calls `.play()` on all `video[autoplay]` elements that already have a `src` (a video whose orientation hasn't been lazy-loaded yet has nothing to play) on three events:
 - `pageshow` with `event.persisted === true` — BFCache restore (reload/back navigation)
 - `visibilitychange` (when `document.hidden` becomes false) — tab switching
 - `load` — initial load fallback
@@ -123,7 +137,7 @@ On mobile browsers, the `autoplay` attribute is sometimes ignored after a page r
 The selector `video[autoplay]` covers all three video elements (landscape hero, portrait hero, post-page background), so both orientation modes are handled.
 
 ### Post Page (`post.hbs` + `default.hbs`)
-- `default.hbs` always renders a `<video class="post-bg-video">` (portrait background) and a `.post-bg-overlay` div, but they are `display: none` by default.
+- `default.hbs` always renders a `<video class="post-bg-video">` (portrait background) and a `.post-bg-overlay` div, but they are `display: none` by default, and the video has no `src` until the page is actually viewed in portrait (see Loading Behavior above).
 - In portrait mode, `body.post-template .post-bg-video` becomes `display: block; position: fixed; inset: 0` — a full-screen fixed video background with `grayscale(100%)` filter and a semi-transparent overlay.
 - Feature images on post pages are desaturated (`grayscale(100%)`) and dimmed (`opacity: 0.3`) with a blue tint overlay.
 

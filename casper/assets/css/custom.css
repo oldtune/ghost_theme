@@ -1,6 +1,7 @@
 /* ================================================================
    Custom Theme — Autumn Orange Landing Page
    Theme color #141c26 · Hero orange #F5A623 · Background #FEF3E2
+   Portrait mode: theme #1b4065 · accent #bb7888
    ================================================================ */
 
 /* ================================================================
@@ -33,7 +34,9 @@ h1, h2, h3, h4, h5, h6 {
    ALL IMAGES — pixelated rendering
    ================================================================ */
 img {
-    image-rendering: pixelated;
+    image-rendering: pixelated;       /* Chrome, Safari, Opera */
+    image-rendering: -moz-crisp-edges; /* old Firefox */
+    image-rendering: crisp-edges;      /* current Firefox */
 }
 
 /* ================================================================
@@ -87,6 +90,13 @@ html {
     /* Accent color driven by Ghost Admin > Brand > Accent color */
     --orange:    var(--ghost-accent-color, #F5A623);
     --orange-dk: var(--ghost-accent-color, #E8950F);
+
+    --card-bg: #2b3541; /* post-card image placeholder background */
+
+    /* Shared blue tint used behind desaturated feature images and the
+       post-page video overlay (portrait, and the landscape ≤991px
+       article image). One value instead of three near-duplicate ones. */
+    --image-tint-rgb: 27, 64, 101;
 }
 
 /* ================================================================
@@ -157,18 +167,25 @@ body.home-template .gh-head {
 .gh-head-button,
 a.gh-head-button {
     background:    var(--orange);
-    border:        2px solid var(--orange);
-    border-radius: 50px;
+    border:        2px solid #000;
+    border-radius: 0;
     padding:       8px 22px;
     color:         #fff;
     font-weight:   600;
+    box-shadow:    4px 4px 0 #000;
 }
 
 .gh-head-button:hover,
 a.gh-head-button:hover {
     background:   var(--orange-dk);
-    border-color: var(--orange-dk);
+    border-color: #000;
     color:        #fff;
+}
+
+.gh-head-button:active,
+a.gh-head-button:active {
+    transform:  translate(2px, 2px);
+    box-shadow: 2px 2px 0 #000;
 }
 
 /* ================================================================
@@ -186,12 +203,15 @@ a.gh-head-button:hover {
     flex-direction: column;
 }
 
-/* Background image fills the full section */
+/* Background image fills the full section.
+   width/height come from `inset: 0` against the positioned .hero-section
+   (.outer sets position: relative) — 100vw/100vh here would overhang the
+   right edge by the scrollbar's width and force a horizontal scrollbar. */
 .hero-bg-image {
     position:        absolute;
     inset:           0;
-    width:           100vw;
-    height:          100vh;
+    width:           100%;
+    height:          100%;
     object-fit:      fill;
     object-position: center;
     z-index:         0;
@@ -274,8 +294,8 @@ a.gh-head-button:hover {
     align-self:     flex-start;
     align-items:    center;
     padding:        10px 26px;
-    border:         2px solid rgba(var(--text-rgb), 0.7);
-    border-radius:  50px;
+    border:         2px solid var(--text);
+    border-radius:  0;
     background:     transparent;
     color:          var(--text);
     font-size:      1.25rem;
@@ -283,7 +303,8 @@ a.gh-head-button:hover {
     letter-spacing: 0.1em;
     text-transform: uppercase;
     text-decoration: none;
-    transition: background 0.2s ease, border-color 0.2s ease;
+    box-shadow: 4px 4px 0 rgba(var(--text-rgb), 0.7);
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .hero-cta-btn:hover {
@@ -291,6 +312,11 @@ a.gh-head-button:hover {
     border-color: var(--text);
     color:        var(--text);
     text-decoration: none;
+}
+
+.hero-cta-btn:active {
+    transform:  translate(2px, 2px);
+    box-shadow: 2px 2px 0 rgba(var(--text-rgb), 0.7);
 }
 
 /* ================================================================
@@ -327,7 +353,7 @@ a.gh-head-button:hover {
    POST CARD IMAGE — grayscale + #2b3541 colour overlay
    ================================================================ */
 .post-card-image-link {
-    background: rgb(43, 53, 65);
+    background: var(--card-bg);
 }
 
 .post-card-image {
@@ -436,15 +462,20 @@ body.home-template #site-main {
 
 @media (orientation: portrait) {
     :root {
-        --theme:    #1b4065 !important;
-        --theme-lt: #1b4065 !important;
-        --text:     #000000 !important;
-        --text-rgb: 0, 0, 0 !important;
+        --theme:       #1b4065 !important;
+        --theme-lt:    #1b4065 !important;
+        /* Was #000000: unreadable over the dark hero video wherever this
+           var is used directly (.hero-title, .hero-description) instead of
+           the explicit #bb7888 below. Reusing the landscape text color
+           keeps the fix inside the existing palette instead of a new one. */
+        --text:        #dfdaf0 !important;
+        --text-rgb:    223, 218, 240 !important;
+        --accent-pink: #bb7888; /* nav, tags, footer, byline in portrait */
     }
 
     .gh-head,
     .gh-head-actions {
-        background-color: #bb7888 !important;
+        background-color: var(--accent-pink) !important;
     }
 
     /* Body, content headings, post cards, article, and footer text */
@@ -485,7 +516,7 @@ body.home-template #site-main {
     .site-footer-nav,
     .site-footer-nav a,
     .site-footer-nav a:hover {
-        color: #bb7888 !important;
+        color: var(--accent-pink) !important;
     }
 
     /* Fixed video background on post pages */
@@ -512,7 +543,7 @@ body.home-template #site-main {
         display: block;
         position: fixed;
         inset: 0;
-        background: rgba(27, 64, 101, 0.3);
+        background: rgba(var(--image-tint-rgb), 0.3);
         z-index: -1;
         pointer-events: none;
     }
@@ -527,7 +558,7 @@ body.home-template #site-main {
     body.post-template .article-tag *,
     body.post-template .post-card-primary-tag,
     body.post-template .post-card-title {
-        color: #bb7888 !important;
+        color: var(--accent-pink) !important;
     }
 
     /* White text for post content */
@@ -557,7 +588,7 @@ body.home-template #site-main {
         position: relative;
         overflow: hidden;
         filter: grayscale(100%);
-        background: rgba(26, 64, 101, 0.8);
+        background: rgba(var(--image-tint-rgb), 0.8);
     }
 
     body.post-template .article-image-wrapper img {
@@ -568,7 +599,7 @@ body.home-template #site-main {
     }
 
 
-    /* Scrollbar — track: navbar bg (#bb7888), thumb: footer bg (#1b4065) */
+    /* Scrollbar — track: transparent, thumb: amber */
     ::-webkit-scrollbar-track {
         background: transparent;
     }
@@ -629,7 +660,7 @@ body.home-template #site-main {
         position: relative;
         overflow: hidden;
         filter: grayscale(100%);
-        background: rgba(26, 64, 101, 0.8);
+        background: rgba(var(--image-tint-rgb), 0.8);
     }
 
     .gh-canvas .article-image img,
@@ -660,6 +691,77 @@ body.home-template #site-main {
     }
 
     /* visual area is flex: 1 so it fills the remaining width automatically */
+}
+
+/* ================================================================
+   PIXEL LOADING INDICATOR — shared by the full-page hero-video gate
+   (home page) and the per-thumbnail loaders (lazy post card images).
+   Both drive their text off the same ::before content animation, so
+   there's one keyframe definition instead of two near-duplicates.
+   ================================================================ */
+/* Each state is the same string length ("LOADING" + 3 dot-or-space
+   slots), so the box never resizes as dots appear — only white-space:
+   pre (below) stops the trailing spaces from being collapsed away. */
+@keyframes loader-dots {
+    0%   { content: 'LOADING   '; }
+    25%  { content: 'LOADING.  '; }
+    50%  { content: 'LOADING.. '; }
+    75%  { content: 'LOADING...'; }
+    100% { content: 'LOADING   '; }
+}
+
+.page-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--theme);
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.page-loader.is-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.page-loader::before,
+.post-card-image-link.is-loading::before {
+    content: 'LOADING   ';
+    white-space: pre;
+    font-family: 'Press Start 2P', monospace;
+    color: var(--text);
+    letter-spacing: 0.05em;
+    animation: loader-dots 2.4s steps(1, end) infinite;
+}
+
+.page-loader::before {
+    font-size: 2rem;
+}
+
+.post-card-image-link.is-loading::before {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-bg);
+    font-size: 1.2rem;
+}
+
+.post-card-image-link.is-loading .post-card-image {
+    opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .page-loader::before,
+    .post-card-image-link.is-loading::before {
+        animation: none;
+        content: 'LOADING...';
+    }
 }
 
 /* ================================================================

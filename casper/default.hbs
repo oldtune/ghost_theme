@@ -40,12 +40,22 @@
 
 </head>
 <body class="{{body_class}} is-head-{{#match @custom.navigation_layout "Logo on cover"}}left-logo{{else match @custom.navigation_layout "Logo in the middle"}}middle-logo{{else}}stacked{{/match}}{{#match @custom.title_font "=" "Elegant serif"}} has-serif-title{{/match}}{{#match @custom.body_font "=" "Modern sans-serif"}} has-sans-body{{/match}}{{#if @custom.show_publication_cover}} has-cover{{/if}}">
+
+    {{!-- Full-page gate: hidden once the home page's active hero video can
+    play (or after a timeout, so a slow/broken connection never traps the
+    visitor here). See the script near the end of this file. --}}
+    {{#is "home"}}
+    <div class="page-loader" id="page-loader" aria-hidden="true"></div>
+    {{/is}}
+
 <div class="viewport">
 
-    {{!-- Fixed video background for post pages in portrait orientation --}}
+    {{!-- Fixed video background for post pages in portrait orientation.
+    No src up front — only loaded if/when the page is actually viewed in
+    portrait, since it's always hidden in landscape anyway. --}}
     <video class="post-bg-video"
-           src="{{asset "images/wall_vertical.webm"}}"
-           autoplay loop muted playsinline
+           data-src="{{asset "images/wall_vertical.webm"}}"
+           autoplay loop muted playsinline preload="none"
            aria-hidden="true"
     ></video>
     <div class="post-bg-overlay"></div>
@@ -120,28 +130,39 @@
     {{> "lightbox"}}
 {{/is}}
 
-{{!-- Scripts - handle member signups, responsive videos, infinite scroll, floating headers, and galleries --}}
+{{!-- Scripts - handle member signups, responsive videos, infinite scroll, floating headers, and galleries.
+Both deferred so they don't block initial rendering. defer preserves relative document order between
+external scripts, so jQuery still finishes before casper.js (which bundles the FitVids jQuery plugin
+and needs $ to already exist) — but the inline script below can't rely on that timing implicitly, since
+non-deferred inline scripts still run immediately, before deferred scripts have executed. The
+$(document).ready(...) call is wrapped in DOMContentLoaded to guarantee $ actually exists by then
+(DOMContentLoaded only fires after all defer scripts finish). --}}
 <script
     src="https://code.jquery.com/jquery-3.5.1.min.js"
     integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
-    crossorigin="anonymous">
+    crossorigin="anonymous"
+    defer>
 </script>
-<script src="{{asset "built/casper.js"}}"></script>
+<script src="{{asset "built/casper.js"}}" defer></script>
 <script>
-$(document).ready(function () {
-    // Mobile Menu Trigger
-    $('.gh-burger').click(function () {
-        $('body').toggleClass('gh-head-open');
+document.addEventListener('DOMContentLoaded', function () {
+    $(document).ready(function () {
+        // Mobile Menu Trigger
+        $('.gh-burger').click(function () {
+            $('body').toggleClass('gh-head-open');
+        });
+        // FitVids - Makes video embeds responsive
+        $(".gh-content").fitVids();
     });
-    // FitVids - Makes video embeds responsive
-    $(".gh-content").fitVids();
 });
 
 // Ensure background videos autoplay on mobile after reload or BFCache restore
 (function () {
     function playAllVideos() {
         document.querySelectorAll('video[autoplay]').forEach(function (v) {
-            if (v.paused) {
+            // v.src may still be unset if this orientation's video hasn't
+            // been lazy-loaded yet (see the block below) — nothing to play.
+            if (v.src && v.paused) {
                 v.play().catch(function () {});
             }
         });
@@ -164,21 +185,87 @@ $(document).ready(function () {
     // Initial load fallback in case autoplay attribute alone wasn't enough
     window.addEventListener('load', playAllVideos);
 }());
+
+// Orientation-aware lazy video loading + a full-page loader gate on the
+// home page + per-thumbnail loading indicators for lazy post card images.
+(function () {
+    var PAGE_LOADER_TIMEOUT_MS = 8000;
+
+    var landscapeVideo = document.querySelector('.hero-bg-landscape');
+    var portraitVideo  = document.querySelector('.hero-bg-portrait');
+    var postBgVideo    = document.querySelector('.post-bg-video');
+    var orientationQuery = window.matchMedia('(orientation: portrait)');
+
+    function loadVideo(video) {
+        if (!video || video.getAttribute('src')) return; // already loaded, or not on this page
+        var src = video.getAttribute('data-src');
+        if (!src) return;
+        video.src = src;
+        video.load();
+    }
+
+    function activeHeroVideo() {
+        return orientationQuery.matches ? portraitVideo : landscapeVideo;
+    }
+
+    // Only fetch whichever video the current orientation actually shows.
+    // post-bg-video is portrait-only (see custom.css), so it loads with
+    // the portrait hero rather than always, or never in landscape.
+    function syncVideosToOrientation() {
+        if (orientationQuery.matches) {
+            loadVideo(portraitVideo);
+            loadVideo(postBgVideo);
+        } else {
+            loadVideo(landscapeVideo);
+        }
+    }
+    syncVideosToOrientation();
+
+    // If the visitor actually rotates/resizes into the other orientation,
+    // load that video then — never both up front.
+    if (orientationQuery.addEventListener) {
+        orientationQuery.addEventListener('change', syncVideosToOrientation);
+    } else if (orientationQuery.addListener) {
+        orientationQuery.addListener(syncVideosToOrientation); // older Safari
+    }
+
+    // Full-page loader (home template only): stay up until the active
+    // hero video can play, or the timeout fires — whichever comes first.
+    var pageLoader = document.getElementById('page-loader');
+    if (pageLoader) {
+        var revealed = false;
+        function revealPage() {
+            if (revealed) return;
+            revealed = true;
+            pageLoader.classList.add('is-hidden');
+        }
+        var hero = activeHeroVideo();
+        if (hero) {
+            hero.addEventListener('canplay', revealPage, { once: true });
+            hero.addEventListener('error', revealPage, { once: true });
+        } else {
+            revealPage();
+        }
+        setTimeout(revealPage, PAGE_LOADER_TIMEOUT_MS);
+    }
+
+    // Per-thumbnail loading indicator for lazy-loaded post card images.
+    document.querySelectorAll('.post-card-image-link').forEach(function (link) {
+        var img = link.querySelector('.post-card-image');
+        if (!img) return;
+        if (img.complete && img.naturalWidth > 0) return; // already loaded (cache)
+        link.classList.add('is-loading');
+        function stopLoading() {
+            link.classList.remove('is-loading');
+        }
+        img.addEventListener('load', stopLoading, { once: true });
+        img.addEventListener('error', stopLoading, { once: true });
+    });
+}());
 </script>
 
 {{!-- Ghost outputs required functional scripts with this tag - it should always be the last thing before the closing body tag --}}
 {{ghost_foot}}
-
-{{!-- Hidden SVG filter used for the pixelate effect on post card images --}}
-<svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
-    <filter id="pixelate">
-        <feFlood x="4" y="4" height="2" width="2"/>
-        <feComposite width="10" height="10"/>
-        <feTile result="a"/>
-        <feComposite in="SourceGraphic" in2="a" operator="in"/>
-        <feMorphology operator="dilate" radius="4"/>
-    </filter>
-</svg>
 
 </body>
 </html>

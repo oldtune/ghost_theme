@@ -8,14 +8,17 @@ into the {body} of the default.hbs template --}}
      and the background image visible through the right side.
      ============================================================ --}}
 <section class="hero-section outer has-bg-image">
+    {{!-- No src up front — only the video matching the current orientation
+    gets loaded, by the script in default.hbs. Keeps a visitor from
+    downloading both hero videos when only one is ever shown. --}}
     <video class="hero-bg-image hero-bg-landscape"
-           src="{{asset "images/wall.webm"}}"
-           autoplay loop muted playsinline
+           data-src="{{asset "images/wall.webm"}}"
+           autoplay loop muted playsinline preload="none"
            aria-hidden="true"
     ></video>
     <video class="hero-bg-image hero-bg-portrait"
-           src="{{asset "images/wall_vertical.webm"}}"
-           autoplay loop muted playsinline
+           data-src="{{asset "images/wall_vertical.webm"}}"
+           autoplay loop muted playsinline preload="none"
            aria-hidden="true"
     ></video>
 
